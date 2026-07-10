@@ -4,9 +4,11 @@ import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -17,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-impo button rt androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +30,7 @@ import com.geo.androidstudio.models.House
 import com.geo.androidstudio.navigation.ROUTE_ADD_HOUSE
 import com.geo.androidstudio.navigation.ROUTE_LANDLORD_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_UPDATE_HOUSE
+import com.geo.androidstudio.viewmodel.AuthViewModel
 import com.geo.androidstudio.viewmodel.LandlordDashboardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +41,7 @@ fun LandLordDashboard(navController: NavHostController) {
     val authViewModel = remember { AuthViewModel(navController, context) }
     val houses by viewModel.houses
     val tenants by viewModel.tenants
+    val bookings by viewModel.bookings
 
     var selectedFilter by remember { mutableStateOf("ALL_HOUSES") }
     var searchQuery by remember { mutableStateOf("") }
@@ -137,22 +141,33 @@ fun LandLordDashboard(navController: NavHostController) {
             }
 
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatCard(
+                        label = "Properties", 
+                        value = houses.size.toString(), 
+                        icon = Icons.Default.Home, 
+                        isSelected = selectedFilter == "ALL_HOUSES",
+                        onClick = { selectedFilter = "ALL_HOUSES" },
+                        modifier = Modifier.width(100.dp)
+                    )
                     StatCard(
                         label = "Tenants", 
                         value = viewModel.tenantCount.value.toString(), 
                         icon = Icons.Default.Person, 
                         isSelected = selectedFilter == "TENANTS",
                         onClick = { selectedFilter = "TENANTS" },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(100.dp)
                     )
                     StatCard(
                         label = "Occupied", 
                         value = viewModel.occupiedCount.value.toString(), 
-                        icon = Icons.Default.Home, 
+                        icon = Icons.Default.Lock, 
                         isSelected = selectedFilter == "OCCUPIED",
                         onClick = { selectedFilter = "OCCUPIED" },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(100.dp)
                     )
                     StatCard(
                         label = "Vacant", 
@@ -160,19 +175,32 @@ fun LandLordDashboard(navController: NavHostController) {
                         icon = Icons.Default.CheckCircle, 
                         isSelected = selectedFilter == "VACANT",
                         onClick = { selectedFilter = "VACANT" },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(100.dp)
                     )
                 }
             }
 
             item {
                 Card(
+                    onClick = { selectedFilter = "FINANCE" },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
-                    shape = RoundedCornerShape(16.dp)
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (selectedFilter == "FINANCE") Color(0xFF1A237E).copy(alpha = 0.1f) else Color(0xFFF5F5F5)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    border = if (selectedFilter == "FINANCE") BorderStroke(1.dp, Color(0xFF1A237E)) else null
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Financial Summary", fontWeight = FontWeight.Bold, color = Color(0xFF1A237E))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Financial Summary", fontWeight = FontWeight.Bold, color = Color(0xFF1A237E))
+                            if (selectedFilter == "FINANCE") {
+                                Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF1A237E))
+                            }
+                        }
                         Spacer(modifier = Modifier.height(12.dp))
                         RentRow("Total Rent Collected", "Kshs ${viewModel.totalRent.value}", Icons.Default.Done, Color(0xFF4CAF50))
                         RentRow("Outstanding Rent", "Kshs 0.00", Icons.Default.Warning, Color(0xFFF44336))
@@ -181,7 +209,16 @@ fun LandLordDashboard(navController: NavHostController) {
                 }
             }
 
-            if (searchQuery.isNotEmpty() || selectedFilter == "TENANTS") {
+            if (selectedFilter == "FINANCE") {
+                item {
+                    Text("Financial Details", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+                items(bookings) { booking ->
+                    val tenant = tenants.find { it.userID == booking.tenantId }
+                    val house = houses.find { it.houseId == booking.houseId }
+                    FinanceItem(booking, tenant, house)
+                }
+            } else if (searchQuery.isNotEmpty() || selectedFilter == "TENANTS") {
                 item { 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -226,8 +263,11 @@ fun LandLordDashboard(navController: NavHostController) {
                 }
 
                 items(filteredHouses) { house ->
+                    val booking = bookings.find { it.houseId == house.houseId }
+                    val tenant = tenants.find { it.userID == booking?.tenantId }
                     PropertyCard(
                         house = house,
+                        tenantName = tenant?.fullname,
                         onEdit = { navController.navigate("$ROUTE_UPDATE_HOUSE/${house.houseId}") },
                         onDelete = {
                             viewModel.deleteHouse(house.houseId) { success ->
@@ -239,6 +279,27 @@ fun LandLordDashboard(navController: NavHostController) {
             }
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
+        }
+    }
+}
+
+@Composable
+fun FinanceItem(booking: com.geo.androidstudio.models.Booking, tenant: com.geo.androidstudio.models.User?, house: House?) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.AccountCircle, contentDescription = null, tint = Color(0xFF1A237E))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(tenant?.fullname ?: "Unknown Tenant", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Kshs ${house?.price ?: "0"}", color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("Property: ${house?.title ?: "Unknown"}", fontSize = 12.sp, color = Color.Gray)
+            Text("Status: Paid", fontSize = 12.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -299,7 +360,7 @@ fun TenantItem(tenant: com.geo.androidstudio.models.User) {
 }
 
 @Composable
-fun PropertyCard(house: House, onEdit: () -> Unit, onDelete: () -> Unit) {
+fun PropertyCard(house: House, tenantName: String? = null, onEdit: () -> Unit, onDelete: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -320,9 +381,14 @@ fun PropertyCard(house: House, onEdit: () -> Unit, onDelete: () -> Unit) {
             }
             
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Kshs ${house.price} / month", fontWeight = FontWeight.SemiBold, color = Color(0xFF1A237E))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Kshs ${house.price} / month", fontWeight = FontWeight.SemiBold, color = Color(0xFF1A237E))
+                if (tenantName != null) {
+                    Text("Tenant: $tenantName", fontSize = 14.sp, color = Color(0xFF1A237E))
+                }
+            }
             
-            Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray)
             
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onEdit) {

@@ -33,7 +33,6 @@ import com.geo.androidstudio.navigation.ROUTE_TENANT_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_USER_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_VIEW_HOUSES
 import com.geo.androidstudio.viewmodel.AuthViewModel
-import com.geo.androidstudio.viewmodel.TenantDashboardViewModel
 import com.geo.androidstudio.viewmodel.tenantdashboard.TenantDashboardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

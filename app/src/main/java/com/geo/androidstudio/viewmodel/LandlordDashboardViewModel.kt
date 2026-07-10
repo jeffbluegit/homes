@@ -35,6 +35,9 @@ class LandlordDashboardViewModel : ViewModel() {
     private val _totalRent = mutableStateOf(0.0)
     val totalRent: State<Double> = _totalRent
 
+    private val _bookings = mutableStateOf<List<Booking>>(emptyList())
+    val bookings: State<List<Booking>> = _bookings
+
     init {
         fetchLandlordData()
     }
@@ -73,10 +76,15 @@ class LandlordDashboardViewModel : ViewModel() {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val tenantIds = mutableSetOf<String>()
+                    val bookingList = mutableListOf<Booking>()
                     for (child in snapshot.children) {
                         val booking = child.getValue(Booking::class.java)
-                        booking?.tenantId?.let { tenantIds.add(it) }
+                        if (booking != null) {
+                            bookingList.add(booking)
+                            tenantIds.add(booking.tenantId)
+                        }
                     }
+                    _bookings.value = bookingList
                     _tenantCount.value = tenantIds.size
                     fetchTenantDetails(tenantIds.toList())
                 }

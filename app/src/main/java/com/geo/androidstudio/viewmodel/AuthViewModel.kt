@@ -7,7 +7,9 @@ import com.geo.androidstudio.models.User
 import com.geo.androidstudio.navigation.ROUTE_ADMIN_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_LANDLORD_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_LOGIN
+import com.geo.androidstudio.navigation.ROUTE_ONBOARDING
 import com.geo.androidstudio.navigation.ROUTE_ROLE_SELECTION
+import com.geo.androidstudio.navigation.ROUTE_SPLASHSCREEN
 import com.geo.androidstudio.navigation.ROUTE_TENANT_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_USER_DASHBOARD
 import com.google.firebase.auth.FirebaseAuth
@@ -102,11 +104,47 @@ class AuthViewModel(var navController:NavHostController,var context: Context) {
             }
         }
     }
-    fun logout(){
+    fun logout() {
         mAuth.signOut()
-        navController.navigate(ROUTE_LOGIN)
-        {popUpTo(0)}
+        navController.navigate(ROUTE_LOGIN) {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
+        }
+    }
 
+    fun checkUserAndNavigate() {
+        val userId = mAuth.currentUser?.uid
+        if (userId != null) {
+            FirebaseDatabase.getInstance().reference.child("User")
+                .child(userId).get().addOnSuccessListener { snapshot ->
+                    val role = snapshot.child("role").value.toString()
+                    when (role) {
+                        "admin" -> navController.navigate(ROUTE_ADMIN_DASHBOARD) {
+                            popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                        }
+                        "user" -> navController.navigate(ROUTE_USER_DASHBOARD) {
+                            popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                        }
+                        "tenant" -> navController.navigate(ROUTE_TENANT_DASHBOARD) {
+                            popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                        }
+                        "landlord" -> navController.navigate(ROUTE_LANDLORD_DASHBOARD) {
+                            popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                        }
+                        else -> navController.navigate(ROUTE_USER_DASHBOARD) {
+                            popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                        }
+                    }
+                }.addOnFailureListener {
+                    navController.navigate(ROUTE_ONBOARDING) {
+                        popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+                    }
+                }
+        } else {
+            navController.navigate(ROUTE_ONBOARDING) {
+                popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
+            }
+        }
     }
 }
 

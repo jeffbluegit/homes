@@ -81,8 +81,8 @@ fun LoginScreen(navController:NavHostController){
                 .padding(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "logo",
+                painter = painterResource(id = R.drawable.house1),
+                contentDescription = "House Logo",
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)

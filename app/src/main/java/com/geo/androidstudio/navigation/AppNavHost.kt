@@ -1,7 +1,9 @@
 package com.geo.androidstudio.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +18,7 @@ import com.geo.androidstudio.screens.login.LoginScreen
 import com.geo.androidstudio.screens.onboarding.OnboardingScreen
 import com.geo.androidstudio.screens.register.RegisterScreen
 import com.geo.androidstudio.screens.splashscreen.SplashScreen
+import com.geo.androidstudio.viewmodel.AuthViewModel
 import com.geo.androidstudio.screens.payment.PaymentScreen
 import com.geo.androidstudio.screens.houses.UpdateHouseScreen
 
@@ -23,7 +26,7 @@ import com.geo.androidstudio.screens.houses.UpdateHouseScreen
 fun AppNavHost(
     modifier : Modifier =Modifier,
     navController: NavHostController= rememberNavController(),
-    startDestination : String = ROUTE_SPLASHSCREEN
+    startDestination: String = ROUTE_SPLASHSCREEN,
 ) {
     NavHost(
         navController=navController,
@@ -31,11 +34,11 @@ fun AppNavHost(
         startDestination = startDestination
     ) {
         composable(ROUTE_SPLASHSCREEN) {
-            SplashScreen(onTimeout = {
-                navController.navigate(ROUTE_ONBOARDING) {
-                    popUpTo(ROUTE_SPLASHSCREEN) { inclusive = true }
-                }
-            })
+            val context = LocalContext.current
+            val authViewModel = remember { AuthViewModel(navController, context) }
+            SplashScreen {
+                authViewModel.checkUserAndNavigate()
+            }
         }
         composable(ROUTE_ONBOARDING) {
             OnboardingScreen(navController)

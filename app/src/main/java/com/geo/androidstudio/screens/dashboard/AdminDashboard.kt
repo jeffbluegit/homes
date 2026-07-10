@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,20 +27,22 @@ import androidx.navigation.compose.rememberNavController
 import com.geo.androidstudio.navigation.ROUTE_ADMIN_DASHBOARD
 import com.geo.androidstudio.navigation.ROUTE_VIEW_HOUSES
 import com.geo.androidstudio.viewmodel.AdminViewModel
+import com.geo.androidstudio.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(navController: NavHostController) {
     val viewModel: AdminViewModel = viewModel()
     val context = LocalContext.current
+    val authViewModel = remember { AuthViewModel(navController, context) }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Admin Console", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { (context as? Activity)?.finish() }) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Exit", tint = Color.White)
+                    IconButton(onClick = { authViewModel.logout() }) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
