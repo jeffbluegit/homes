@@ -25,6 +25,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.geo.androidstudio.navigation.ROUTE_ADMIN_DASHBOARD
+import com.geo.androidstudio.navigation.ROUTE_PROFILE
+import com.geo.androidstudio.navigation.ROUTE_SETTINGS
 import com.geo.androidstudio.navigation.ROUTE_VIEW_HOUSES
 import com.geo.androidstudio.viewmodel.AdminViewModel
 import com.geo.androidstudio.viewmodel.AuthViewModel
@@ -72,14 +74,14 @@ fun AdminDashboardScreen(navController: NavHostController) {
                     label = { Text("Home", color = Color.White) }
                 )
                 NavigationBarItem(
-                    selected = false,
-                    onClick = { Toast.makeText(context, "Profile coming soon", Toast.LENGTH_SHORT).show() },
+                    selected = currentDestination == ROUTE_PROFILE,
+                    onClick = { navController.navigate(ROUTE_PROFILE) },
                     icon = { Icon(Icons.Default.Person, contentDescription = "Profile", tint = Color.White) },
                     label = { Text("Profile", color = Color.White) }
                 )
                 NavigationBarItem(
-                    selected = false,
-                    onClick = { Toast.makeText(context, "Settings coming soon", Toast.LENGTH_SHORT).show() },
+                    selected = currentDestination == ROUTE_SETTINGS,
+                    onClick = { navController.navigate(ROUTE_SETTINGS) },
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White) },
                     label = { Text("Settings", color = Color.White) }
                 )

@@ -12,6 +12,9 @@ const val ROUTE_TENANT_DASHBOARD="tenant-dashboard"
 
 const val ROUTE_USER_DASHBOARD="user-dashboard"
 
+const val ROUTE_PROFILE="profile"
+const val ROUTE_SETTINGS="settings"
+
 const val ROUTE_ADD_HOUSE="add-house"
 const val ROUTE_VIEW_HOUSES="view-houses"
 const val ROUTE_UPDATE_HOUSE="update-house"

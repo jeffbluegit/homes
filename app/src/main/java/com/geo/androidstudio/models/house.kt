@@ -8,4 +8,7 @@ data class House(
     val price: Double = 0.0,
     val location: String="",
     val status: String="available"
+
+
+
 )

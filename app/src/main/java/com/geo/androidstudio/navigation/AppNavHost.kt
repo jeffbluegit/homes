@@ -20,6 +20,8 @@ import com.geo.androidstudio.screens.register.RegisterScreen
 import com.geo.androidstudio.screens.splashscreen.SplashScreen
 import com.geo.androidstudio.viewmodel.AuthViewModel
 import com.geo.androidstudio.screens.payment.PaymentScreen
+import com.geo.androidstudio.screens.profile.ProfileScreen
+import com.geo.androidstudio.screens.settings.SettingsScreen
 import com.geo.androidstudio.screens.houses.UpdateHouseScreen
 
 @Composable
@@ -63,6 +65,12 @@ fun AppNavHost(
         }
         composable(ROUTE_TENANT_DASHBOARD){
             TenantDashboardScreen(navController)
+        }
+        composable(ROUTE_PROFILE) {
+            ProfileScreen(navController)
+        }
+        composable(ROUTE_SETTINGS) {
+            SettingsScreen(navController)
         }
         composable(ROUTE_ADD_HOUSE) {
             AddHouseScreen(navController)

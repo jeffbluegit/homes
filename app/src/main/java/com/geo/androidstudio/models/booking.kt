@@ -6,5 +6,5 @@ data class Booking(
         val houseId:String = "",
         val tenantId: String = "",
         val landlordId: String = "",
-        val status : String = "pending"
+        val status : String = ""
         )
