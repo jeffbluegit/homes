@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "777628720622",
+    "project_id": "a4dable-h4m3",
+    "storage_bucket": "a4dable-h4m3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777628720622:android:c53a1797e6d00da2da42ff",
+        "android_client_info": {
+          "package_name": "com.geo.androidstudio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4ykgsLBDj0VrUa87fVBv4I5JNgIlpbB4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
